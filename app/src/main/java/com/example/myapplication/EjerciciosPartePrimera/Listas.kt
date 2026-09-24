@@ -80,4 +80,39 @@ fun main() {
 
     //Ejercicio 9
 
+    val listaOrdenNormal = mutableListOf(1,6,3,7,4,8);
+    val listaInversa = listaOrdenNormal.reversed();
+    println("Lista normal"+listaOrdenNormal + "\nLista Inversa" + listaInversa)
+
+    //Ejercicio 10
+
+    val listaNumerosParaQuitarpares = mutableListOf(1,11,13,4,2,32,51)
+    listaNumerosParaQuitarpares.removeIf { element -> element % 2 == 0 }
+    println("La suma de la lista de los impares es = " +listaNumerosParaQuitarpares.sum())
+
+    //Ejercicio 11
+
+    val animales = mutableListOf("perro","gato","perro","ratón")
+
+    for(i in animales.indices)
+    {
+        if(animales[i].equals("perro"))
+        {
+            animales.set(i,"gato");
+        }
+    }
+    println(animales)
+
+    //Ejercicio 12
+
+    val numerosConRepetidos = mutableListOf(1,2,3,5,1,2,6,3,666,2,3,6)
+    val listaSinRepetidos = numerosConRepetidos.distinct()
+    println("La lista con repetidos = "+numerosConRepetidos)
+    println("La lista sin repetidos = "+ listaSinRepetidos)
+
+    //Ejercicio 13
+
+
+
+
 }
