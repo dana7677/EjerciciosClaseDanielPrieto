@@ -108,15 +108,30 @@ fun main() {
 
 
     //A7 Mapa del inventario
-    val mapaInventario = mutableListOf<Pair<Int, String>>()
+    data class Producto(var cantidad: Int, val nombre: String)
 
-    mapaInventario.add(10 to "Gominolas")
-    mapaInventario.add(5 to "Refrescos")
-    mapaInventario.add(2 to "Bocatas")
 
-    fun retirarStock(): Boolean
-    {
+    var mapaInventario = mutableListOf<Producto>()
 
-        return true;
+    mapaInventario.add(Producto(10, "Gominolas"))
+    mapaInventario.add(Producto(5, "Refrescos"))
+    mapaInventario.add(Producto(2, "Bocatas"))
+
+    fun retirarStock(cantidad: Int, nombreProducto: String): Boolean {
+
+        var resultado = mapaInventario.find { it.nombre == nombreProducto }
+
+        if (resultado != null) {
+            if (resultado.cantidad >= cantidad) {
+
+                resultado.cantidad -= cantidad
+                println("Stock retirado con éxito. Quedan: ${resultado.cantidad}")
+            } else {
+                println("No hay stock disponible")
+            }
+        } else {
+            println("Fallo en búsqueda")
+        }
+        return true
     }
 }
