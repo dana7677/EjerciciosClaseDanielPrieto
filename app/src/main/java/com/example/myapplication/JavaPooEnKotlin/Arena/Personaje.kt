@@ -3,6 +3,12 @@ package com.example.myapplication.JavaPooEnKotlin.Arena
 import android.R
 import android.widget.Switch
 
+sealed class ResultadoAtaque {
+    data class Impacto(val danio: Float) : ResultadoAtaque()
+    data object SinRecursos : ResultadoAtaque()
+    data object ObjetivoFueraDeCombate : ResultadoAtaque()
+    data object PersonajeFueraDeCombate : ResultadoAtaque()
+}
 
 
 public fun setStatsPorClase(miClase:Clase): ModeloPersonaje
@@ -13,6 +19,7 @@ public fun setStatsPorClase(miClase:Clase): ModeloPersonaje
             Clase.GUERRERO -> vidaPasar = 120.0f;
             Clase.ARQUERO -> vidaPasar = 100.0f;
             Clase.MAGO -> vidaPasar = 80.0f;
+            Clase.CLERIGO -> vidaPasar = 10.0f;
             else -> { // Note the block
                 vidaPasar = 0.0f;
                 print("No es valido")
@@ -23,6 +30,7 @@ public fun setStatsPorClase(miClase:Clase): ModeloPersonaje
         Clase.GUERRERO -> dmgPasar = 15.0f;
         Clase.ARQUERO -> dmgPasar = 10.0f;
         Clase.MAGO -> dmgPasar = 20.0f;
+        Clase.CLERIGO -> dmgPasar = 15.0f;
         else -> { // Note the block
             dmgPasar = 0.0f;
             print("No es valido")
@@ -33,6 +41,7 @@ public fun setStatsPorClase(miClase:Clase): ModeloPersonaje
         Clase.GUERRERO -> manaPasar = 12.0f;
         Clase.ARQUERO -> manaPasar = 12.0f;
         Clase.MAGO -> manaPasar = 60.0f;
+        Clase.CLERIGO -> manaPasar = 80.0f;
         else -> { // Note the block
             manaPasar = 0.0f;
             print("No es valido")
@@ -43,7 +52,7 @@ public fun setStatsPorClase(miClase:Clase): ModeloPersonaje
     return statsPasar
 }
 
-class Personaje(miClase: Clase,nombreInicial: String,flechasPasar:Int)
+class Personaje(miClase: Clase,nombreInicial: String,flechasPasar:Int,puedeCurarPasar: Boolean)
 {
 
     val clasePersonaje = miClase;
@@ -54,67 +63,97 @@ class Personaje(miClase: Clase,nombreInicial: String,flechasPasar:Int)
     var flechas = flechasPasar;
     var mana = statsBase.mana;
     var fueraDeCombate =false;
+    var puedeCurar = puedeCurarPasar;
 
-    fun ataque(personajeObjetivo: Personaje): Float {
+    fun mostrarResultado(resultado: ResultadoAtaque) {
+
+        when (resultado) {
+            is ResultadoAtaque.Impacto ->
+                println("El ataque ha impactado y hace ${resultado.danio} de daño")
+            ResultadoAtaque.SinRecursos ->
+                println("No quedan recursos para atacar")
+            ResultadoAtaque.ObjetivoFueraDeCombate ->
+                println("El objetivo está fuera de combate")
+            ResultadoAtaque.PersonajeFueraDeCombate ->
+                println("Tu personaje está fuera de combate")
+        }
+    }
+    fun ataque(personajeObjetivo: Personaje):ResultadoAtaque {
 
         if (fueraDeCombate==true) {
             print(nombre + "Fuera de combate no puede atacar")
-            return 0.0f
+            return ResultadoAtaque.PersonajeFueraDeCombate
         }
         else
         {
             when (clasePersonaje) {
 
                 Clase.GUERRERO -> {
-                    personajeObjetivo.recibirDmg(dmg, false)
+                    if(personajeObjetivo.fueraDeCombate==true)
+                    {
+                        return ResultadoAtaque.ObjetivoFueraDeCombate
+                    }
+                    else
+                    {
+                        personajeObjetivo.recibirDmg(dmg, false)
+                        println(
+                            nombre + " golpea con la espada a " + personajeObjetivo.nombre +
+                                    " ("+dmg+ ") -> " + personajeObjetivo.printEstado()
+                        )
 
-                    println(
-                        nombre + " golpea con la espada a " + personajeObjetivo.nombre +
-                                " (-15) -> " + personajeObjetivo.printEstado()
-                    )
+                        return ResultadoAtaque.Impacto(dmg);
+                    }
 
-                    return dmg
+
+
                 }
 
                 Clase.ARQUERO -> {
-                    if (flechas <= 0) {
+                    if(personajeObjetivo.fueraDeCombate==true)
+                    {
+                        return ResultadoAtaque.ObjetivoFueraDeCombate
+                    }
+                    else if (flechas <= 0) {
                         println(nombre + " No quedan flechas")
-                        return 0.0f
+                        return ResultadoAtaque.SinRecursos
                     } else {
                         personajeObjetivo.recibirDmg(dmg, false)
                         flechas= flechas-1;
 
                         println(
                             nombre + " dispara una flecha a " + personajeObjetivo.nombre +
-                                    " (-10, quedan " + flechas + ") -> " +
+                                     "( "+dmg+"quedan " + flechas + ") -> " +
                                     personajeObjetivo.printEstado()
                         )
-
-                        return dmg
+                        return ResultadoAtaque.Impacto(dmg);
                     }
                 }
 
-                Clase.MAGO -> {
-                    if (mana < 20) {
+                Clase.MAGO, Clase.CLERIGO -> {
+                    if(personajeObjetivo.fueraDeCombate==true)
+                    {
+                        return ResultadoAtaque.ObjetivoFueraDeCombate
+                    }
+                    else if (mana < 20) {
                         println(nombre + " No queda maná")
-                        return 0.0f
+                        return ResultadoAtaque.SinRecursos
                     } else {
                         personajeObjetivo.recibirDmg(dmg, false)
                         mana -= 20.0f
 
                         println(
                             nombre + " lanza un hechizo a " + personajeObjetivo.nombre +
-                                    " (-20, maná " + mana + ") -> " +
+                                    " ("+dmg +" maná " + mana + ") -> " +
                                     personajeObjetivo.printEstado()
                         )
 
-                        return dmg
+                        return ResultadoAtaque.Impacto(dmg);
                     }
                 }
 
                 else -> {
                     print("No es válido")
-                    return 0.0f
+                    return ResultadoAtaque.PersonajeFueraDeCombate
                 }
             }
 
@@ -146,7 +185,7 @@ class Personaje(miClase: Clase,nombreInicial: String,flechasPasar:Int)
     }
     public fun printCanHealth()
     {
-        if(clasePersonaje == Clase.MAGO && fueraDeCombate!=true)
+        if(puedeCurar==true && fueraDeCombate!=true)
         {
             println(nombre+" puede curar")
         }

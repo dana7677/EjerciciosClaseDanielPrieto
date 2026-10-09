@@ -4,5 +4,6 @@ enum class Clase {
         GUERRERO,
         MAGO,
         ARQUERO,
+        CLERIGO,
 
 }
