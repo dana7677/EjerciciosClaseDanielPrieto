@@ -1,25 +1,24 @@
 package com.example.myapplication.GestorDeTareas
 
-import com.example.myapplication.EjerciciosLambda.Producto2
-
-data class Tarea(val titulo: String, val prioridad: Int, var completada: Boolean = false)
-
-
-    //String.esTituloValido()
-    //devuelve true si el texto no está en blanco y tiene al menos 3 caracteres.
-    //List<Tarea>.pendientes(): devuelve solo las tareas no completadas.
-fun Tarea.esTituloValido(): Boolean {
-
-    if(titulo!=null && titulo.length>=3)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+data class Tarea(
+    val titulo: String,
+    val prioridad: Int,
+    var completada: Boolean = false
+)
+{
+    val icono: String
+        get() = if (completada) "[x]" else "[ ]"
 }
 
+// Comprueba si el título es válido
+fun String.esTituloValido(): Boolean {
+    return this.isNotBlank() && this.length >= 3
+}
+
+// Devuelve las tareas pendientes
+fun List<Tarea>.pendientes(): List<Tarea> {
+    return this.filter { tarea -> !tarea.completada }
+}
 
 
 
